@@ -339,6 +339,60 @@ namespace wrench {
       return "Network error (link failure, or communication peer died) while " + operation + " mailbox_name " + this->mailbox;
     };
 
+
+    /**
+     * @brief Constructor
+     *
+     * @param operation_type: HostFailedError:OperationType::SENDING or HostFailedError::OperationType::RECEIVING
+     * @param mailbox: the name of a mailbox
+     */
+    HostFailedError::HostFailedError(HostFailedError::OperationType operation_type,
+                               std::string mailbox) : FailureCause(HOST_FAILED_ERROR) {
+      if (mailbox.empty()) {
+        throw std::invalid_argument("HostFailedError::HostFailedError(): invalid arguments");
+      }
+      this->operation_type = operation_type;
+      this->mailbox = mailbox;
+    }
+
+    /**
+    * @brief Returns whether the network error occurred while receiving
+    * @return true or false
+    */
+    bool HostFailedError::whileReceiving() {
+      return (this->operation_type == HostFailedError::RECEIVING);
+    }
+
+    /**
+     * @brief Returns whether the network error occurred while sending
+     * @return true or false
+     */
+    bool HostFailedError::whileSending() {
+      return (this->operation_type == HostFailedError::SENDING);
+    }
+
+    /**
+     * @brief Returns the mailbox name on which the error occurred
+     * @return the mailbox name
+     */
+    std::string HostFailedError::getMailbox() {
+      return this->mailbox;
+    }
+
+    /**
+     * @brief Get the human-readable failure message
+     * @return the message
+     */
+    std::string HostFailedError::toString() {
+      std::string operation;
+      if (this->while_sending) {
+        operation = "sending to";
+      } else {
+        operation = "receiving from";
+      }
+      return "Host Failed error while " + operation + " mailbox_name " + this->mailbox;
+    };
+
 //    /**
 //     * @brief Constructor
 //     *

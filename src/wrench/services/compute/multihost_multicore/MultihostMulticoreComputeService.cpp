@@ -782,6 +782,9 @@ namespace wrench {
 
       try {
         message = S4U_Mailbox::getMessage(this->mailbox_name);
+      } catch (std::shared_ptr<HostFailedError> & cause) {
+        WRENCH_INFO("Got a host failed error while getting some message... terminating");
+        return false;
       } catch (std::shared_ptr<NetworkError> &cause) {
         WRENCH_INFO("Got a network error while getting some message... ignoring");
         return true;

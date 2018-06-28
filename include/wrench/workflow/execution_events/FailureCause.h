@@ -73,7 +73,9 @@ namespace wrench {
             /** @brief A functionality is not available */
                     FUNCTIONALITY_NOT_AVAILABLE,
             /** @brief A job was terminated due to a timeout */
-                    JOB_TIMEOUT
+                    JOB_TIMEOUT,
+            /** @brief A host failed */
+                    HOST_FAILED_ERROR
 
         };
 
@@ -380,6 +382,38 @@ namespace wrench {
     private:
         NetworkError::OperationType operation_type;
         NetworkError::ErrorType error_type;
+        bool while_sending = false;
+        std::string mailbox = "";
+    };
+
+    /**
+     * @brief A "host failed error " failure cause
+     */
+    class HostFailedError : public FailureCause {
+    public:
+        /** @brief Enumerated type to describe whether the host failed while waiting to receive something or while
+         * trying to something
+         */
+        enum OperationType {
+            SENDING,
+            RECEIVING
+        };
+
+        /***********************/
+        /** \cond INTERNAL     */
+        /***********************/
+        HostFailedError(HostFailedError::OperationType, std::string mailbox);
+        /***********************/
+        /** \endcond           */
+        /***********************/
+
+        std::string toString();
+        bool whileReceiving();
+        bool whileSending();
+        std::string getMailbox();
+
+    private:
+        HostFailedError::OperationType operation_type;
         bool while_sending = false;
         std::string mailbox = "";
     };

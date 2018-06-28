@@ -86,6 +86,24 @@ namespace wrench {
       return 0;
     }
 
+    void S4U_Daemon::reStartDaemon() {
+      try {
+        this->terminated = false;
+        if (not this->terminated) {
+          WRENCH_INFO("Is this daemonized %d",this->is_daemonized);
+          if (this->is_daemonized) {
+            simgrid::s4u::Actor::self()->daemonize();
+//            this->s4u_actor->daemonize();
+          }
+        }
+        this->main();
+      } catch (std::exception &e) {
+        throw;
+      }
+      this->setTerminated();
+    }
+
+
 
     /**
      * \endcond
@@ -111,11 +129,20 @@ namespace wrench {
                 this->getName() + ")");
       }
 
+
       // Create the s4u_actor
       try {
+
+//        this->s4u_actor = simgrid::s4u::Actor::createActor(this->process_name.c_str(),
+//                                                           simgrid::s4u::Host::by_name(hostname),
+//                                                           S4U_DaemonActor(this));
+
+        std::function<void()> restart_daemon_function = std::bind(&S4U_Daemon::reStartDaemon, this);
         this->s4u_actor = simgrid::s4u::Actor::createActor(this->process_name.c_str(),
                                                            simgrid::s4u::Host::by_name(hostname),
-                                                           S4U_DaemonActor(this));
+                                                           restart_daemon_function);
+
+
       } catch (std::exception &e) {
         // Some internal SimGrid exceptions...
         std::abort();
@@ -126,9 +153,12 @@ namespace wrench {
       // terminate immediately. This is a weird simgrid::s4u behavior/bug, that may be
       // fixed at some point, but this test saves us for now.
       if (not this->terminated) {
+        this->is_daemonized = false;
         if (daemonized) {
+          this->is_daemonized = true;
           this->s4u_actor->daemonize();
         }
+        this->s4u_actor->setAutoRestart(true);
         this->s4u_actor->onExit(daemon_goodbye, (void *) (this));
 
         // Set the mailbox_name receiver
@@ -231,5 +261,9 @@ namespace wrench {
      */
     void S4U_Daemon::releaseDaemonLock() {
       this->daemon_lock->unlock();
+    }
+
+    simgrid::s4u::ActorPtr S4U_Daemon::getActr() {
+      return this->s4u_actor;
     }
 };

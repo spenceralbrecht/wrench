@@ -159,7 +159,6 @@ namespace wrench {
         throw std::runtime_error("Simulation::launch(): " + std::string(e.what()));
       }
 
-
       // Start all services (and the WMS)
       try {
         this->startAllProcesses();

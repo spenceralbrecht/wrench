@@ -21,6 +21,7 @@
 #include <wrench/exceptions/WorkflowExecutionException.h>
 #include <wrench/services/network_proximity/NetworkProximityService.h>
 #include <algorithm>
+#include <xbt/ex.hpp>
 
 XBT_LOG_NEW_DEFAULT_CATEGORY(file_registry_service, "Log category for File Registry Service");
 
@@ -267,6 +268,7 @@ namespace wrench {
 
       TerminalOutput::setThisProcessLoggingColor(TerminalOutput::COLOR_MAGENTA);
 
+
       WRENCH_INFO("File Registry Service starting on host %s!", S4U_Simulation::getHostName().c_str());
 
       /** Main loop **/
@@ -290,6 +292,9 @@ namespace wrench {
 
       try {
         message = S4U_Mailbox::getMessage(this->mailbox_name);
+      } catch (std::shared_ptr<HostFailedError> & cause) {
+        WRENCH_INFO("Got a host failed error while getting some message... terminating");
+        return false;
       } catch (std::shared_ptr<NetworkError> &cause) {
         return true;
       }

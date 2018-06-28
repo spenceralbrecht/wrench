@@ -52,6 +52,8 @@ namespace wrench {
 
         void startDaemon(bool daemonized);
 
+        void reStartDaemon();
+
         void createLifeSaver(std::shared_ptr<S4U_Daemon> reference);
 
         virtual void cleanup();
@@ -71,6 +73,8 @@ namespace wrench {
 
         /** @brief a pointer to the simulation object */
         Simulation *simulation;
+
+        simgrid::s4u::ActorPtr getActr();
     protected:
 
         void killActor();
@@ -84,6 +88,7 @@ namespace wrench {
         // while it's in the middle of doing something critical
         simgrid::s4u::MutexPtr daemon_lock;
         bool terminated;
+        bool is_daemonized;
         simgrid::s4u::ActorPtr s4u_actor;
 
     };

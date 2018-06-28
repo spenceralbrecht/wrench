@@ -51,8 +51,10 @@ namespace wrench {
         } else if (e.category == timeout_error) {
             throw std::shared_ptr<NetworkError>(
                     new NetworkError(NetworkError::RECEIVING, NetworkError::TIMEOUT, mailbox_name));
-        } else {
-          throw std::runtime_error("S4U_Mailbox::getMessage(): Unexpected xbt_ex exception (" + std::to_string(e.category) + ")");
+        } else if (e.category == host_error) {
+          throw std::shared_ptr<HostFailedError>(
+                  new HostFailedError(HostFailedError::RECEIVING, mailbox_name));
+          //Received a host failed error but doing nothing in the hope that it will be up again
         }
       } catch (std::exception &e) {
         throw std::shared_ptr<NetworkError>(
