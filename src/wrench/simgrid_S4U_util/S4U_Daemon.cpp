@@ -92,8 +92,8 @@ namespace wrench {
         if (not this->terminated) {
           WRENCH_INFO("Is this daemonized %d",this->is_daemonized);
           if (this->is_daemonized) {
-            simgrid::s4u::Actor::self()->daemonize();
-//            this->s4u_actor->daemonize();
+            this->s4u_actor = simgrid::s4u::Actor::self();
+            this->s4u_actor->daemonize();
           }
         }
         this->main();
@@ -261,9 +261,5 @@ namespace wrench {
      */
     void S4U_Daemon::releaseDaemonLock() {
       this->daemon_lock->unlock();
-    }
-
-    simgrid::s4u::ActorPtr S4U_Daemon::getActr() {
-      return this->s4u_actor;
     }
 };

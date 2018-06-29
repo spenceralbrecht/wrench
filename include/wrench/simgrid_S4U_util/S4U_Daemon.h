@@ -73,8 +73,6 @@ namespace wrench {
 
         /** @brief a pointer to the simulation object */
         Simulation *simulation;
-
-        simgrid::s4u::ActorPtr getActr();
     protected:
 
         void killActor();
