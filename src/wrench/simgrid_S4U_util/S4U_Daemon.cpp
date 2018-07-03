@@ -143,7 +143,7 @@ namespace wrench {
 //                                                           S4U_DaemonActor(this));
 
         std::function<void()> restart_daemon_function = std::bind(&S4U_Daemon::reStartDaemon, this);
-        this->s4u_actor = simgrid::s4u::Actor::createActor(this->process_name.c_str(),
+        this->s4u_actor = simgrid::s4u::Actor::create(this->process_name.c_str(),
                                                            simgrid::s4u::Host::by_name(hostname),
                                                            restart_daemon_function);
 
@@ -163,8 +163,8 @@ namespace wrench {
           this->is_daemonized = true;
           this->s4u_actor->daemonize();
         }
-        this->s4u_actor->setAutoRestart(true);
-        this->s4u_actor->onExit(daemon_goodbye, (void *) (this));
+        this->s4u_actor->set_auto_restart(true);
+        this->s4u_actor->on_exit(daemon_goodbye, (void *) (this));
 
         // Set the mailbox_name receiver
         simgrid::s4u::MailboxPtr mailbox = simgrid::s4u::Mailbox::by_name(this->mailbox_name);
