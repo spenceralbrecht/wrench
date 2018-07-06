@@ -48,5 +48,16 @@ namespace wrench {
     ServiceTTLExpiredMessage::ServiceTTLExpiredMessage(double payload)
             : ServiceMessage("TTL_EXPIRED", payload) {}
 
+    /**
+    * @brief Constructor
+    * @param hostname: the name of the failed host
+    * @param job: the workflow job that should fail because the host failed
+    * @param payload: message size in bytes
+    *
+    * @throw std::invalid_arguments
+    */
+    HostFailedMessage::HostFailedMessage(std::string hostname, WorkflowJob* job, double payload)
+            : ServiceMessage("HOST_FAILED", payload), job(job), hostname(hostname) {}
+
 
 };

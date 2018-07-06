@@ -54,7 +54,6 @@ namespace wrench {
         } else if (e.category == host_error) {
           throw std::shared_ptr<HostFailedError>(
                   new HostFailedError(HostFailedError::RECEIVING, mailbox_name));
-          //Received a host failed error but doing nothing in the hope that it will be up again
         }
       } catch (std::exception &e) {
         throw std::shared_ptr<NetworkError>(

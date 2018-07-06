@@ -118,6 +118,7 @@ namespace wrench {
 
       SimulationMessage *msg_to_send_back = nullptr;
       bool success;
+      bool host_alive = false;
 
       try {
         performWork(this->workunit);
@@ -134,6 +135,10 @@ namespace wrench {
         // build "failed!" message
         WRENCH_INFO("Got an exception while performing work: %s", e.getCause()->toString().c_str());
         success = false;
+        if (e.getCause()->getCauseType() == FailureCause::HOST_FAILED_ERROR) {
+          host_alive = false;
+        }
+
         msg_to_send_back = new WorkunitExecutorFailedMessage(
                 this,
                 this->workunit,
@@ -146,13 +151,19 @@ namespace wrench {
         WRENCH_INFO("Notifying mailbox_name %s that work has completed",
                     this->callback_mailbox.c_str());
       } else {
-        WRENCH_INFO("Notifying mailbox_name %s that work has failed",
-                    this->callback_mailbox.c_str());
+        if (host_alive) {
+          WRENCH_INFO("Notifying mailbox_name %s that work has failed",
+                      this->callback_mailbox.c_str());
+        } else {
+          WRENCH_INFO("Cannot notify uppper level StandardJobExecutor because it's host is also down");
+        }
       }
 
 
       try {
-        S4U_Mailbox::putMessage(this->callback_mailbox, msg_to_send_back);
+        if (host_alive) {
+          S4U_Mailbox::putMessage(this->callback_mailbox, msg_to_send_back);
+        }
       } catch (std::shared_ptr<NetworkError> &cause) {
         WRENCH_INFO("Work unit executor on can't report back due to network error.. aborting!");
         this->workunit = nullptr; // To decrease the ref count
@@ -392,6 +403,7 @@ namespace wrench {
       this->releaseDaemonLock();  // People can kill me now
 
       success = true;
+      bool host_alive = true;
       // Wait for all actors to complete
       #ifndef S4U_KILL_JOIN_WORKS
       for (unsigned long i = 0; i < this->compute_threads.size(); i++) {
@@ -402,6 +414,13 @@ namespace wrench {
           // Do nothing, perhaps the child has died
           success = false;
           continue;
+        } catch (std::shared_ptr<HostFailedError> & cause) {
+          // If my host is dead, I cannot do anythin actually, I cannot even receive or send anything to upper level services (StandardJobExecutor, MHMCCS),
+          // because they were also on the same host as I am, so I will throw an exception but not reply any callback
+          WRENCH_INFO("Got a host failed error while getting some message... terminating");
+          success = false;
+          host_alive = false;
+          break;
         }
       }
       #else
@@ -419,8 +438,10 @@ namespace wrench {
       }
       #endif
 
-      if (!success) {
+      if (!success && host_alive) {
         throw WorkflowExecutionException(std::shared_ptr<FailureCause>(new ComputeThreadHasDied()));
+      } else if(!success && !host_alive) {
+        throw WorkflowExecutionException(std::shared_ptr<FailureCause>(new HostFailedError(HostFailedError::RECEIVING, tmp_mailbox)));
       }
     }
 

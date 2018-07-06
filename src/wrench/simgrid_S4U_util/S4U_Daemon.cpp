@@ -95,7 +95,6 @@ namespace wrench {
       try {
         this->terminated = false;
         if (not this->terminated) {
-          WRENCH_INFO("Is this daemonized %d",this->is_daemonized);
           if (this->is_daemonized) {
             this->s4u_actor = simgrid::s4u::Actor::self();
             this->s4u_actor->daemonize();

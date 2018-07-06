@@ -61,6 +61,16 @@ namespace wrench {
         ServiceTTLExpiredMessage(double payload);
     };
 
+    /**
+    * @brief A message sent to the job_manager/wms to notify them that the host is down)
+    */
+    class HostFailedMessage : public ServiceMessage {
+    public:
+        HostFailedMessage(std::string hostname, WorkflowJob* job, double payload);
+        WorkflowJob* job;
+        std::string hostname;
+    };
+
 
 
 

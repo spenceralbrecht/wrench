@@ -782,6 +782,13 @@ namespace wrench {
       try {
         message = S4U_Mailbox::getMessage(this->mailbox_name);
       } catch (std::shared_ptr<HostFailedError> & cause) {
+        try {
+          S4U_Mailbox::dputMessage((*this->running_jobs.begin())->getCallbackMailbox(),
+                                   new HostFailedMessage(this->hostname, (*this->running_jobs.begin()), this->getMessagePayloadValueAsDouble(
+                                                   MultihostMulticoreComputeServiceMessagePayload::DAEMON_STOPPED_MESSAGE_PAYLOAD)));
+        } catch (std::shared_ptr<NetworkError> &cause) {
+          throw WorkflowExecutionException(cause);
+        }
         WRENCH_INFO("Got a host failed error while getting some message... terminating");
         return false;
       } catch (std::shared_ptr<NetworkError> &cause) {

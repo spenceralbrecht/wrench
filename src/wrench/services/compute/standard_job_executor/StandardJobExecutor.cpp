@@ -547,6 +547,9 @@ namespace wrench {
         message = S4U_Mailbox::getMessage(this->mailbox_name);
       } catch (std::shared_ptr<NetworkError> &cause) {
         return true;
+      } catch (std::shared_ptr<HostFailedError> & cause) {
+        WRENCH_INFO("Got a host failed error while getting some message... terminating");
+        return false;
       } catch (std::shared_ptr<FatalFailure> &cause) {
         WRENCH_INFO("Got a Unknown Failure during a communication... likely this means we're all done. Aborting");
         return false;

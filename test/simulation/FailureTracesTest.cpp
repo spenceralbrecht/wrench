@@ -32,6 +32,7 @@ public:
     wrench::Simulation *simulation;
 
     void do_CheckHowSimgridRespondsToFailureTraces_test();
+    void do_CheckWhatHappensToRunningStandardJobAfterHostRestarts_test();
 
 
 protected:
@@ -200,7 +201,7 @@ void FailureTracesTest::do_CheckHowSimgridRespondsToFailureTraces_test() {
   auto simulation = new wrench::Simulation();
   int argc = 1;
   auto argv = (char **) calloc(1, sizeof(char *));
-  argv[0] = strdup("scratch_space_test");
+  argv[0] = strdup("failure_traces_test");
 
   ASSERT_NO_THROW(simulation->init(&argc, argv));
 
@@ -230,6 +231,143 @@ void FailureTracesTest::do_CheckHowSimgridRespondsToFailureTraces_test() {
   wrench::WMS *wms = nullptr;
   ASSERT_NO_THROW(wms = simulation->add(
           new FailureTracesTestTestWMS(
+                  this, {compute_service}, wms_hostname)));
+
+  ASSERT_NO_THROW(wms->addWorkflow(std::move(workflow.get())));
+
+
+  // Running a "run a single task" simulation
+  // Note that in these tests the WMS creates workflow tasks, which a user would
+  // of course not be likely to do
+  ASSERT_NO_THROW(simulation->launch());
+
+  delete simulation;
+
+  free(argv[0]);
+  free(argv);
+}
+
+
+/**********************************************************************/
+/**                Standard Jobs After Host Restarts                 **/
+/**********************************************************************/
+
+class StandardJobsAfterHostRestartsTestWMS : public wrench::WMS {
+
+public:
+    StandardJobsAfterHostRestartsTestWMS(FailureTracesTest *test,
+                             const std::set<wrench::ComputeService *> &compute_services,
+                             std::string hostname) :
+            wrench::WMS(nullptr, nullptr, compute_services, {}, {}, nullptr, hostname,
+                        "test") {
+      this->test = test;
+    }
+
+private:
+
+    FailureTracesTest *test;
+
+    int main() {
+      // Create a job manager
+      std::shared_ptr<wrench::JobManager> job_manager = this->createJobManager();
+
+      {
+        // Create a sequential task that lasts one second and requires 1 cores
+        wrench::WorkflowTask *task = this->getWorkflow()->addTask("task", 100, 1, 1, 1.0, 0);
+
+        // Create a StandardJob with no file operations
+        wrench::StandardJob *job = job_manager->createStandardJob(
+                {task},
+                {},
+                {},
+                {},
+                {});
+
+        // Submit the job for execution, I should get a job completion event
+        job_manager->submitJob(job, this->test->compute_service);
+
+        //Now since, host that is running this job will shut down after 5th second,
+        // we expect some kind of error, (host failed error)
+
+        // Wait for a workflow execution event
+        std::unique_ptr<wrench::WorkflowExecutionEvent> event;
+        try {
+          event = this->getWorkflow()->waitForNextExecutionEvent();
+        } catch (wrench::WorkflowExecutionException &e) {
+          //This is the expected host failed error
+          WRENCH_INFO("Expectedly we need to get this exception because the host was down: %s ", e.getCause()->toString().c_str());
+        }
+
+        //Now we would like to sleep until the 15th second when the host reboots
+        wrench::S4U_Simulation::sleep(15);
+
+        //Now, we would like to check what happens to the job that was submitted earlier and was stopped in the middle of execution
+
+        // Wait for a workflow execution event
+//        try {
+//          WRENCH_INFO("Waiting for the job done message");
+//          event = this->getWorkflow()->waitForNextExecutionEvent();
+//        } catch (wrench::WorkflowExecutionException &e) {
+//          throw std::runtime_error("Unexpected workflow execution event: " + std::to_string((int) (event->type)));
+//        }
+//        switch (event->type) {
+//          case wrench::WorkflowExecutionEvent::STANDARD_JOB_COMPLETION: {
+//            WRENCH_INFO("Received a job done message");
+//            break;
+//          }
+//          default: {
+//            std::cerr << "This is the type of event that I found " << std::to_string((int) (event->type)) << "\n";
+//          }
+//        }
+
+      }
+
+      return 0;
+    }
+};
+
+TEST_F(FailureTracesTest, CheckWhatHappensToRunningStandardJobAfterHostRestartsTest) {
+  DO_TEST_WITH_FORK(do_CheckWhatHappensToRunningStandardJobAfterHostRestarts_test);
+}
+
+
+void FailureTracesTest::do_CheckWhatHappensToRunningStandardJobAfterHostRestarts_test() {
+
+
+  // Create and initialize a simulation
+  auto simulation = new wrench::Simulation();
+  int argc = 1;
+  auto argv = (char **) calloc(1, sizeof(char *));
+  argv[0] = strdup("failure_traces_test");
+
+  ASSERT_NO_THROW(simulation->init(&argc, argv));
+
+  // Setting up the platform
+  ASSERT_NO_THROW(simulation->instantiatePlatform(platform_file_path));
+
+  // Get a hostname
+  std::string hostname = simulation->getHostnameList()[0];
+
+  std::string wms_hostname = simulation->getHostnameList()[1];
+
+  // Create a Storage Service
+  ASSERT_NO_THROW(storage_service1 = simulation->add(
+          new wrench::SimpleStorageService(hostname, 1000000.0)));
+
+
+  // Create a Compute Service
+  ASSERT_NO_THROW(compute_service = simulation->add(
+          new wrench::MultihostMulticoreComputeService(hostname,
+                                                       {std::make_tuple(hostname, wrench::ComputeService::ALL_CORES,
+                                                                        wrench::ComputeService::ALL_RAM)},
+                                                       1000000.0, {})));
+
+  simulation->add(new wrench::FileRegistryService(hostname));
+
+  // Create a WMS
+  wrench::WMS *wms = nullptr;
+  ASSERT_NO_THROW(wms = simulation->add(
+          new StandardJobsAfterHostRestartsTestWMS(
                   this, {compute_service}, wms_hostname)));
 
   ASSERT_NO_THROW(wms->addWorkflow(std::move(workflow.get())));
