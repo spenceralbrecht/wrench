@@ -17,6 +17,8 @@
 #include "wrench/services/file_registry/FileRegistryService.h"
 #include "wrench/services/storage/StorageService.h"
 #include "wrench/simulation/Simulation.h"
+#include "simgrid/plugins/load.h"
+#include "simgrid/plugins/energy.h"
 
 XBT_LOG_NEW_DEFAULT_CATEGORY(simulation, "Log category for Simulation");
 
@@ -56,6 +58,10 @@ namespace wrench {
 
     }
 
+    static void HostStateChangeCallbackFunction (simgrid::s4u::Host& h) {
+      std::cout << "Hey guys\n";
+    }
+
     /**
      * @brief Destructor
      */
@@ -92,7 +98,13 @@ namespace wrench {
       }
       *argc = i - skip;
 
+
       this->s4u_simulation->initialize(argc, argv);
+
+      sg_host_load_plugin_init();
+//      sg_host_energy_plugin_init();
+      simgrid::s4u::Host::on_state_change.connect(&HostStateChangeCallbackFunction);
+
 
       // activate VM migration plugin
       sg_vm_live_migration_plugin_init();

@@ -118,7 +118,7 @@ namespace wrench {
 
       SimulationMessage *msg_to_send_back = nullptr;
       bool success;
-      bool host_alive = false;
+      bool host_alive = true;
 
       try {
         performWork(this->workunit);

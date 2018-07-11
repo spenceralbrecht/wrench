@@ -46,7 +46,11 @@ namespace wrench {
       this->mailbox_name = mailbox_prefix + "_" + std::to_string(seq);
       this->process_name = process_name_prefix + "_" + std::to_string(seq);
       this->terminated = false;
+
     }
+
+//    simgrid::xbt::signal<simgrid::s4u::Host> simgrid::s4u::Host::on_state_change = simgrid::s4u::Host::by_name("Host1");
+
 
 //     NOT NEEDED?
 //    /**
@@ -109,6 +113,7 @@ namespace wrench {
 
 
 
+
     /**
      * \endcond
      */
@@ -141,6 +146,10 @@ namespace wrench {
 //                                                           simgrid::s4u::Host::by_name(hostname),
 //                                                           S4U_DaemonActor(this));
 
+
+//        auto host_state_changed_callback = std::bind(&HostStateChangeCallbackFunction, nullptr);
+
+//        simgrid::s4u::Host::current()->on_state_change.connect(&HostStateChangeCallbackFunction);
         std::function<void()> restart_daemon_function = std::bind(&S4U_Daemon::reStartDaemon, this);
         this->s4u_actor = simgrid::s4u::Actor::create(this->process_name.c_str(),
                                                            simgrid::s4u::Host::by_name(hostname),

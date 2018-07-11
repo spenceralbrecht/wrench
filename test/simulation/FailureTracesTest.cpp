@@ -41,9 +41,14 @@ protected:
       // Create the simplest workflow
       workflow = std::unique_ptr<wrench::Workflow>(new wrench::Workflow());
 
-      std::string trace_file_content = "PERIODICITY 10\n"
-              " 0 1\n"
-              " 5 0";
+//      std::string trace_file_content = "PERIODICITY 10\n"
+//              " 0 1\n"
+//              " 5 0";
+
+      std::string trace_file_content = "5 0\n"
+              "      15 1\n"
+              "      LOOPAFTER 20";
+
 
       FILE *trace_file = fopen(trace_file_path.c_str(), "w");
       fprintf(trace_file, "%s", trace_file_content.c_str());
