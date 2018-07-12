@@ -20,6 +20,8 @@
 
 namespace wrench {
 
+    std::map<std::string, int> S4U_Simulation::host_life_states = {};
+
     /**
      * @brief Initialize the Simgrid simulation
      *
@@ -211,6 +213,28 @@ namespace wrench {
      */
     double S4U_Simulation::getHostMemoryCapacity(std::string hostname) {
       return getHostMemoryCapacity(simgrid::s4u::Host::by_name(hostname));
+    }
+
+    /**
+     * @brief Get the life state either ON/OFF of a host
+     * @param hostname: the name of the host
+     * @return the life state (0/1) of the host
+     */
+    int S4U_Simulation::getHostLifeState(std::string hostname) {
+      int state = 1;
+      if (wrench::S4U_Simulation::host_life_states.find(hostname) != wrench::S4U_Simulation::host_life_states.end()) {
+        state = wrench::S4U_Simulation::host_life_states[hostname];
+      }
+      return state;
+    }
+
+    /**
+     * @brief Get the life state either ON/OFF of a host
+     * @param hostname: the name of the host
+     * @return the life state (0/1) of the host
+     */
+    void S4U_Simulation::setHostLifeState(std::string hostname, int state) {
+      wrench::S4U_Simulation::host_life_states[hostname] = state;
     }
 
     /**

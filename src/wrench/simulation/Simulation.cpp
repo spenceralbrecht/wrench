@@ -10,6 +10,8 @@
 
 #include <csignal>
 #include <simgrid/plugins/live_migration.h>
+#include <wrench/simgrid_S4U_util/S4U_Mailbox.h>
+#include <wrench/services/ServiceMessage.h>
 
 #include "wrench/logging/TerminalOutput.h"
 #include "wrench/services/Service.h"
@@ -19,6 +21,7 @@
 #include "wrench/simulation/Simulation.h"
 #include "simgrid/plugins/load.h"
 #include "simgrid/plugins/energy.h"
+
 
 XBT_LOG_NEW_DEFAULT_CATEGORY(simulation, "Log category for Simulation");
 
@@ -58,16 +61,55 @@ namespace wrench {
 
     }
 
-    static void HostStateChangeCallbackFunction (simgrid::s4u::Host& h) {
-      std::cout << "Hey guys\n";
-    }
-
     /**
      * @brief Destructor
      */
     Simulation::~Simulation() {
       this->s4u_simulation->shutdown();
     }
+
+    static void DaemonAboutTobeDestroyed(simgrid::s4u::ActorPtr actor) {
+      if (!actor->get_host()->is_on()) {
+        //We want to send a message to WMS host about the actor being dead but only once by one actor running on the host
+//        std::cout << actor->get_host()->get_name() << "\n";
+        if (wrench::S4U_Simulation::getHostLifeState(actor->get_host()->get_name())) {
+          std::cout << actor->get_host()->get_name() << "\n";
+          wrench::S4U_Simulation::setHostLifeState(actor->get_host()->get_name(),0);
+          std::cout << "Hey guys\n";
+          WRENCH_INFO(
+                  "SEND A MESSAGE TO WMS_ACTOR SAYING THAT THIS HOST HAS FAILED AND DO NOT EXPECT ANY FURTHER MESSAGE FROM THIS HOST");
+        }
+      }
+    }
+
+    void Simulation::onActorBeingDestroyed(simgrid::s4u::ActorPtr actor) {
+      if (!actor->get_host()->is_on()) {
+        //We want to send a message to WMS host about the actor being dead but only once by one actor running on the host
+//        std::cout << actor->get_host()->get_name() << "\n";
+        if (wrench::S4U_Simulation::getHostLifeState(actor->get_host()->get_name())) {
+          std::cout << actor->get_host()->get_name() << "\n";
+          std::cout << simgrid::s4u::Actor::self()->get_name() << "\n";
+          wrench::S4U_Simulation::setHostLifeState(actor->get_host()->get_name(),0);
+          std::cout << actor->get_name() << "\n";
+          std::cout << (*this->wmses.begin())->getWorkflow()->getCallbackMailbox() << "\n";
+          WRENCH_INFO("Trying to sleep for 5 seconds");
+          wrench::S4U_Simulation::sleep(5);
+          WRENCH_INFO("Slept for 5 seconds");
+//          try {
+//            S4U_Mailbox::putMessage((*this->wmses.begin())->getWorkflow()->getCallbackMailbox(),
+//                                    new HostFailedMessage(actor->get_host()->get_name(),
+//                                                          nullptr, 1));
+//          } catch (std::shared_ptr<NetworkError> &cause) {
+//            WRENCH_INFO("Failed to send the callback... oh well");
+//            return;
+//          }
+          std::cout << "Hey guys\n";
+          WRENCH_INFO(
+                  "SEND A MESSAGE TO WMS_ACTOR SAYING THAT THIS HOST HAS FAILED AND DO NOT EXPECT ANY FURTHER MESSAGE FROM THIS HOST");
+        }
+      }
+    }
+
 
     /**
      * @brief Initialize the simulation, which parses out WRENCH-specific and SimGrid-specific
@@ -98,12 +140,10 @@ namespace wrench {
       }
       *argc = i - skip;
 
-
+//      simgrid::s4u::Actor::on_destruction.connect(&DaemonAboutTobeDestroyed);
+      std::function<void(simgrid::s4u::ActorPtr actor)> actor_being_destroyed_function = std::bind(&Simulation::onActorBeingDestroyed, this, std::placeholders::_1);
+      simgrid::s4u::Actor::on_destruction.connect(actor_being_destroyed_function);
       this->s4u_simulation->initialize(argc, argv);
-
-      sg_host_load_plugin_init();
-//      sg_host_energy_plugin_init();
-      simgrid::s4u::Host::on_state_change.connect(&HostStateChangeCallbackFunction);
 
 
       // activate VM migration plugin

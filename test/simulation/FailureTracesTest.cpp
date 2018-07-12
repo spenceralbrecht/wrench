@@ -41,13 +41,13 @@ protected:
       // Create the simplest workflow
       workflow = std::unique_ptr<wrench::Workflow>(new wrench::Workflow());
 
-//      std::string trace_file_content = "PERIODICITY 10\n"
-//              " 0 1\n"
-//              " 5 0";
+      std::string trace_file_content = "PERIODICITY 10\n"
+              " 0 1\n"
+              " 5 0";
 
-      std::string trace_file_content = "5 0\n"
-              "      15 1\n"
-              "      LOOPAFTER 20";
+//      std::string trace_file_content = "5 0\n"
+//              "      15 1\n"
+//              "      LOOPAFTER 20";
 
 
       FILE *trace_file = fopen(trace_file_path.c_str(), "w");
@@ -277,7 +277,7 @@ private:
       std::shared_ptr<wrench::JobManager> job_manager = this->createJobManager();
 
       {
-        // Create a sequential task that lasts one second and requires 1 cores
+        // Create a sequential task that lasts 100 seconds and requires 1 cores
         wrench::WorkflowTask *task = this->getWorkflow()->addTask("task", 100, 1, 1, 1.0, 0);
 
         // Create a StandardJob with no file operations
@@ -295,13 +295,14 @@ private:
         // we expect some kind of error, (host failed error)
 
         // Wait for a workflow execution event
-        std::unique_ptr<wrench::WorkflowExecutionEvent> event;
-        try {
-          event = this->getWorkflow()->waitForNextExecutionEvent();
-        } catch (wrench::WorkflowExecutionException &e) {
-          //This is the expected host failed error
-          WRENCH_INFO("Expectedly we need to get this exception because the host was down: %s ", e.getCause()->toString().c_str());
-        }
+//        std::unique_ptr<wrench::WorkflowExecutionEvent> event;
+//        try {
+//          WRENCH_INFO("WMS Waiting for some message");
+//          event = this->getWorkflow()->waitForNextExecutionEvent();
+//        } catch (wrench::WorkflowExecutionException &e) {
+//          //This is the expected host failed error
+//          WRENCH_INFO("Expectedly we need to get this exception because the host was down: %s ", e.getCause()->toString().c_str());
+//        }
 
         //Now we would like to sleep until the 15th second when the host reboots
         wrench::S4U_Simulation::sleep(15);

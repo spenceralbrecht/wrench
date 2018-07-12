@@ -97,6 +97,10 @@ namespace wrench {
 
     void S4U_Daemon::reStartDaemon() {
       try {
+        //If the host is turned off, we would like to turn it on
+        if (wrench::S4U_Simulation::getHostLifeState(wrench::S4U_Simulation::getHostName())) {
+          wrench::S4U_Simulation::setHostLifeState(wrench::S4U_Simulation::getHostName(),1);
+        }
         this->terminated = false;
         if (not this->terminated) {
           if (this->is_daemonized) {

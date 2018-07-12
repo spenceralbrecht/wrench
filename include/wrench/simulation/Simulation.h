@@ -101,6 +101,8 @@ namespace wrench {
 
         void startAllProcesses();
 
+        void onActorBeingDestroyed(simgrid::s4u::ActorPtr actor);
+
     };
 
 };

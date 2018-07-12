@@ -36,6 +36,7 @@ namespace wrench {
 
       // Get the message from the mailbox_name
       std::unique_ptr<SimulationMessage> message = nullptr;
+      std::cout << "mailbox name is "<< mailbox << "\n";
       try {
         message = S4U_Mailbox::getMessage(mailbox);
       } catch (std::shared_ptr<NetworkError> &cause) {
@@ -67,6 +68,17 @@ namespace wrench {
           return std::unique_ptr<FileCopyFailedEvent>(
                   new FileCopyFailedEvent(m->file, m->storage_service, m->failure_cause));
         }
+      } else if (auto m = dynamic_cast<HostFailedMessage *>(message.get())) {
+        // Forward the notification to the source
+        std::cout << "Here I am\n";
+        return nullptr;
+//        WorkflowJob* job = m->job;
+//        try {
+//          S4U_Mailbox::dputMessage(job->getOriginCallbackMailbox(),
+//                                   new HostFailedMessage(m->hostname, m->job, 0.0));
+//        } catch (std::shared_ptr<NetworkError> &cause) {
+//        }
+
       } else {
         throw std::runtime_error(
                 "WorkflowExecutionEvent::waitForNextExecutionEvent(): Non-handled message type when generating execution event");

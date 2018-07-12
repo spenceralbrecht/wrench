@@ -35,6 +35,8 @@ namespace wrench {
 				static unsigned int getHostNumCores(std::string hostname);
 				static double getHostFlopRate(std::string hostname);
 				static double getHostMemoryCapacity(std::string hostname);
+				static int getHostLifeState(std::string);
+				static void setHostLifeState(std::string, int);
 				static std::string getHostname();
 				static void compute(double flops);
 				static void sleep(double duration);
@@ -50,7 +52,9 @@ namespace wrench {
 				simgrid::s4u::Engine *engine;
 				bool initialized = false;
 				bool platform_setup = false;
+				static std::map<std::string, int> host_life_states;
 		};
+
 
 		/***********************/
 		/** \endcond           */
