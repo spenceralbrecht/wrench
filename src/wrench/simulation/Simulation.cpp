@@ -440,6 +440,20 @@ namespace wrench {
 
 
     /**
+     * @brief Set a JobManager for the simulation.
+     *
+     * @param job_manager: a JobManager
+     * @throw std::invalid_argument
+     */
+    void Simulation::add(JobManager *job_manager) {
+      if (job_manager == nullptr) {
+        throw std::invalid_argument("Simulation::add(): invalid arguments");
+      }
+      this->job_manager = job_manager;
+    }
+
+
+    /**
      * @brief Stage a copy of a file on a storage service
      *
      * @param file: a file to stage on a storage service

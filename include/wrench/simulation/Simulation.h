@@ -52,6 +52,7 @@ namespace wrench {
         NetworkProximityService * add(NetworkProximityService *);
         WMS * add(WMS *);
         FileRegistryService * add(FileRegistryService *);
+        void add(JobManager *);
 
         void stageFile(WorkflowFile *file, StorageService *storage_service);
 
@@ -102,6 +103,8 @@ namespace wrench {
         void startAllProcesses();
 
         void onActorBeingDestroyed(simgrid::s4u::ActorPtr actor);
+
+        JobManager* job_manager;
 
     };
 

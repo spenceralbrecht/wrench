@@ -303,6 +303,7 @@ namespace wrench {
       std::shared_ptr<JobManager> job_manager = std::shared_ptr<JobManager>(job_manager_raw_ptr);
       job_manager->simulation = this->simulation;
       job_manager->start(job_manager, true); // Always daemonize
+      this->simulation->add(job_manager_raw_ptr);
       return job_manager;
     }
 
