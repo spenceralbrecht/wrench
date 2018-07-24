@@ -689,4 +689,13 @@ namespace wrench {
       return 0;
     }
 
+    void JobManager::sendHostFailedMessageToWMS() {
+      WRENCH_INFO("Forwarding a host failed message to the WMS");
+      try {
+        S4U_Mailbox::dputMessage(this->wms_mailbox_name,
+                                 new HostFailedMessage("", nullptr, 0.0));
+      } catch (std::shared_ptr<NetworkError> &cause) {
+      }
+    }
+
 };

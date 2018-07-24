@@ -92,9 +92,13 @@ namespace wrench {
           wrench::S4U_Simulation::setHostLifeState(actor->get_host()->get_name(),0);
           std::cout << actor->get_name() << "\n";
           std::cout << (*this->wmses.begin())->getWorkflow()->getCallbackMailbox() << "\n";
-          WRENCH_INFO("Trying to sleep for 5 seconds");
-          wrench::S4U_Simulation::sleep(5);
-          WRENCH_INFO("Slept for 5 seconds");
+//          this->job_manager->sendHostFailedMessageToWMS();
+
+          
+//          WRENCH_INFO("Trying to sleep for 5 seconds");
+//          wrench::S4U_Simulation::sleep(5);
+
+//          WRENCH_INFO("Slept for 5 seconds");
 //          try {
 //            S4U_Mailbox::putMessage((*this->wmses.begin())->getWorkflow()->getCallbackMailbox(),
 //                                    new HostFailedMessage(actor->get_host()->get_name(),
@@ -103,7 +107,6 @@ namespace wrench {
 //            WRENCH_INFO("Failed to send the callback... oh well");
 //            return;
 //          }
-          std::cout << "Hey guys\n";
           WRENCH_INFO(
                   "SEND A MESSAGE TO WMS_ACTOR SAYING THAT THIS HOST HAS FAILED AND DO NOT EXPECT ANY FURTHER MESSAGE FROM THIS HOST");
         }

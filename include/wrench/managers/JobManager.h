@@ -65,6 +65,8 @@ namespace wrench {
 
 				void submitJob(WorkflowJob *job, ComputeService *compute_service, std::map<std::string, std::string> service_specific_args = {});
 
+				void sendHostFailedMessageToWMS();
+
 				void terminateJob(WorkflowJob *);
 
 				void forgetJob(WorkflowJob *job);
@@ -107,6 +109,10 @@ namespace wrench {
 				std::set<PilotJob *> pending_pilot_jobs;
 				std::set<PilotJob *> running_pilot_jobs;
 				std::set<PilotJob *> completed_pilot_jobs;
+
+
+				//mailbox
+				std::string wms_mailbox_name;
 
 		};
 

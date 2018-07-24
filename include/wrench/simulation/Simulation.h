@@ -25,6 +25,7 @@
 namespace wrench {
 
     class StorageService;
+    class JobManager;
 
     /**
      * @brief A class that provides basic simulation methods
