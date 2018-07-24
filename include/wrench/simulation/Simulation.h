@@ -103,7 +103,7 @@ namespace wrench {
 
         void startAllProcesses();
 
-        void onActorBeingDestroyed(simgrid::s4u::ActorPtr actor);
+//        void onActorBeingDestroyed(simgrid::s4u::ActorPtr actor);
 
         JobManager* job_manager;
 

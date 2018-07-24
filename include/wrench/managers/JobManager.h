@@ -74,6 +74,8 @@ namespace wrench {
 				std::set<PilotJob *> getPendingPilotJobs();
 
 				std::set<PilotJob *> getRunningPilotJobs();
+
+				void onActorBeingDestroyed(simgrid::s4u::ActorPtr actor);
 				/***********************/
 				/** \cond INTERNAL    */
 				/***********************/

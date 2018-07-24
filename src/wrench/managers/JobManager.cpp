@@ -492,6 +492,11 @@ namespace wrench {
 
       WRENCH_INFO("New Job Manager starting (%s)", this->mailbox_name.c_str());
 
+
+      //Connect to the on actor being destroyed function, so that jobmanager will get a callback
+      std::function<void(simgrid::s4u::ActorPtr actor)> actor_being_destroyed_function = std::bind(&JobManager::onActorBeingDestroyed, this, std::placeholders::_1);
+      simgrid::s4u::Actor::on_destruction.connect(actor_being_destroyed_function);
+
       bool keep_going = true;
       while (keep_going) {
         std::unique_ptr<SimulationMessage> message = nullptr;
@@ -695,6 +700,39 @@ namespace wrench {
         S4U_Mailbox::dputMessage(this->wms_mailbox_name,
                                  new HostFailedMessage("", nullptr, 0.0));
       } catch (std::shared_ptr<NetworkError> &cause) {
+      }
+    }
+
+
+    void JobManager::onActorBeingDestroyed(simgrid::s4u::ActorPtr actor) {
+      if (!actor->get_host()->is_on()) {
+        //We want to send a message to WMS host about the actor being dead but only once by one actor running on the host
+//        std::cout << actor->get_host()->get_name() << "\n";
+        if (wrench::S4U_Simulation::getHostLifeState(actor->get_host()->get_name())) {
+          std::cout << actor->get_host()->get_name() << "\n";
+          std::cout << simgrid::s4u::Actor::self()->get_name() << "\n";
+          wrench::S4U_Simulation::setHostLifeState(actor->get_host()->get_name(),0);
+          std::cout << actor->get_name() << "\n";
+//          this->job_manager->sendHostFailedMessageToWMS();
+
+
+          WRENCH_INFO("I am about to be destroyed but I am checking if I can sleep for 1 seconds");
+          wrench::S4U_Simulation::sleep(1);
+          WRENCH_INFO("Slept for 5 seconds");
+
+//          WRENCH_INFO("I am about to be destroyed but I am checking if I can send a message to the WMS");
+//          try {
+//            S4U_Mailbox::putMessage(this->wms_mailbox_name,
+//                                    new HostFailedMessage(actor->get_host()->get_name(),
+//                                                          nullptr, 0));
+//          } catch (std::shared_ptr<NetworkError> &cause) {
+//            WRENCH_INFO("Failed to send the callback... oh well");
+//            return;
+//          }
+
+          WRENCH_INFO(
+                  "SEND A MESSAGE TO WMS_ACTOR SAYING THAT THIS HOST HAS FAILED AND DO NOT EXPECT ANY FURTHER MESSAGE FROM THIS HOST");
+        }
       }
     }
 

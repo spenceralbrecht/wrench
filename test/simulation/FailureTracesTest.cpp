@@ -288,7 +288,7 @@ private:
                 {},
                 {});
 
-        // Submit the job for execution, I should get a job completion event
+        // Submit the job for execution, this job will be stopped in the middle because of the host failure
         job_manager->submitJob(job, this->test->compute_service);
 
         //Now since, host that is running this job will shut down after 5th second,
@@ -304,7 +304,7 @@ private:
 //          WRENCH_INFO("Expectedly we need to get this exception because the host was down: %s ", e.getCause()->toString().c_str());
 //        }
 
-        //Now we would like to sleep until the 15th second when the host reboots
+        //Now we would like to sleep until the 15th second when the host reboots/restarts
         wrench::S4U_Simulation::sleep(15);
 
         //Now, we would like to check what happens to the job that was submitted earlier and was stopped in the middle of execution
