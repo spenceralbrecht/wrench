@@ -247,6 +247,7 @@ namespace wrench {
       this->DAG_node_map = std::unique_ptr<lemon::ListDigraph::NodeMap<WorkflowTask *>>(
               new lemon::ListDigraph::NodeMap<WorkflowTask *>(*DAG));
       this->callback_mailbox = S4U_Mailbox::generateUniqueMailboxName("workflow_mailbox");
+      this->simulation = nullptr;
     };
 
     /**
@@ -296,10 +297,6 @@ namespace wrench {
           }
         } else {
           if (task_map.find(task->getClusterID()) != task_map.end()) {
-            if (task->getState() == WorkflowTask::State::NOT_READY) {
-              task->setInternalState(WorkflowTask::InternalState::TASK_READY);
-              task->setState(WorkflowTask::State::READY);
-            }
             task_map[task->getClusterID()].push_back(task);
           }
         }

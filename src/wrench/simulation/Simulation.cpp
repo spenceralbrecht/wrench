@@ -22,7 +22,6 @@
 #include "simgrid/plugins/load.h"
 #include "simgrid/plugins/energy.h"
 
-
 XBT_LOG_NEW_DEFAULT_CATEGORY(simulation, "Log category for Simulation");
 
 namespace wrench {
@@ -111,8 +110,13 @@ namespace wrench {
         argv[i] = argv[i + skip];
       }
       *argc = i - skip;
-
-//      simgrid::s4u::Actor::on_destruction.connect(&DaemonAboutTobeDestroyed);
+      
+      //activate energy plugin
+      if (*argc >= 2) {
+        if (strcmp(argv[1], "--activate_energy") == 0) {
+          sg_host_energy_plugin_init();
+        }
+      }
       this->s4u_simulation->initialize(argc, argv);
 
 
@@ -535,7 +539,7 @@ namespace wrench {
      * @return a memory capacity in bytes
      */
     double Simulation::getMemoryCapacity() {
-      return S4U_Simulation::getHostMemoryCapacity(S4U_Simulation::getHostname());
+      return S4U_Simulation::getHostMemoryCapacity(S4U_Simulation::getHostName());
     }
 
     /**
@@ -543,7 +547,7 @@ namespace wrench {
      * @return a number of cores
      */
     unsigned long Simulation::getNumCores() {
-      return S4U_Simulation::getHostNumCores(S4U_Simulation::getHostname());
+      return S4U_Simulation::getHostNumCores(S4U_Simulation::getHostName());
     }
 
     /**
@@ -551,7 +555,7 @@ namespace wrench {
      * @return a flop rate
      */
     double Simulation::getFlopRate() {
-      return S4U_Simulation::getHostFlopRate(S4U_Simulation::getHostname());
+      return S4U_Simulation::getHostFlopRate(S4U_Simulation::getHostName());
     }
 
 

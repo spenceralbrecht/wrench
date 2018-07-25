@@ -1492,6 +1492,7 @@ namespace wrench {
       } catch (std::shared_ptr<NetworkError> &cause) {
         return;
       }
+
     }
 
     /**

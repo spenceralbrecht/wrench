@@ -185,29 +185,29 @@ namespace wrench {
         StorageService *storage_service;
     };
 
-    /**
-     * @brief A "file is already there" failure cause
-     */
-    class StorageServiceFileAlreadyThere : public FailureCause {
-
-    public:
-        /***********************/
-        /** \cond INTERNAL     */
-        /***********************/
-        StorageServiceFileAlreadyThere(WorkflowFile *file, StorageService *storage_service);
-        /***********************/
-        /** \endcond           */
-        /***********************/
-
-        WorkflowFile *getFile();
-        StorageService *getStorageService();
-        std::string toString();
-
-
-    private:
-        WorkflowFile *file;
-        StorageService *storage_service;
-    };
+//    /**
+//     * @brief A "file is already there" failure cause
+//     */
+//    class StorageServiceFileAlreadyThere : public FailureCause {
+//
+//    public:
+//        /***********************/
+//        /** \cond INTERNAL     */
+//        /***********************/
+//        StorageServiceFileAlreadyThere(WorkflowFile *file, StorageService *storage_service);
+//        /***********************/
+//        /** \endcond           */
+//        /***********************/
+//
+//        WorkflowFile *getFile();
+//        StorageService *getStorageService();
+//        std::string toString();
+//
+//
+//    private:
+//        WorkflowFile *file;
+//        StorageService *storage_service;
+//    };
 
     /**
      * @brief A "file is already being copied" failure cause
@@ -218,20 +218,20 @@ namespace wrench {
         /***********************/
         /** \cond INTERNAL     */
         /***********************/
-        FileAlreadyBeingCopied(WorkflowFile *file, StorageService *dst, std::string dst_dir);
+        FileAlreadyBeingCopied(WorkflowFile *file, StorageService *dst, std::string dst_partition);
         /***********************/
         /** \endcond           */
         /***********************/
 
         WorkflowFile *getFile();
         StorageService *getStorageService();
-        std::string getDir();
+        std::string getPartition();
         std::string toString();
 
     private:
         WorkflowFile *file;
         StorageService *storage_service;
-        std::string dst_dir;
+        std::string dst_partition;
     };
 
     /**
