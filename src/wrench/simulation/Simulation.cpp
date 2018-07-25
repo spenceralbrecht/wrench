@@ -110,7 +110,7 @@ namespace wrench {
         argv[i] = argv[i + skip];
       }
       *argc = i - skip;
-      
+
       //activate energy plugin
       if (*argc >= 2) {
         if (strcmp(argv[1], "--activate_energy") == 0) {
