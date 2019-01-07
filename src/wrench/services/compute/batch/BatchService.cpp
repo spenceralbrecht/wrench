@@ -41,6 +41,27 @@
 
 XBT_LOG_NEW_DEFAULT_CATEGORY(batch_service, "Log category for Batch Service");
 
+/**
+ * @brief A function that returns a rounded-down "what time is it now?" clock value. This
+ *   is only used/useful when Batsched is enabled. Communication with Batschedf involves
+ *   exchanging "what time is it now?" messages. Batsched computes time slices, i.e.,
+ *   time intervals during which things are supposed to happen. Because WRENCH simulations
+ *   do take some (simulated) time, sometimes, the BatchService will send a "now" that is
+ *   after the end of a time slice, causing batsched to say "you've moved too far ahead in time
+ *   and I haven't had time to process the end of my time slice, which is now in the past" (or at least
+ *   Henri things that this is what's hapenning).  To solve this, one option (i.e., hack) is to
+ *   round down the "now" that is sent to batsched a bit. This is what this function is doing. The
+ *   time sent for the "now" field of the JSON object sent to Batsched should this be computed
+ *   using this function, instead of merely wrench::S4U_Simulation::getClock().
+ *
+ */
+static double getClockLessAccurate() {
+    int number_of_significant_digits = 3;
+    double factor = pow(10, number_of_significant_digits);
+    double real_clock = wrench::S4U_Simulation::getClock();
+    return  floor(real_clock * factor) / factor;
+}
+
 namespace wrench {
 
     /**
@@ -2332,7 +2353,7 @@ namespace wrench {
 
 
       nlohmann::json simulation_ends_msg;
-      simulation_ends_msg["now"] = S4U_Simulation::getClock();
+      simulation_ends_msg["now"] = getClockLessAccurate();
       simulation_ends_msg["events"][0]["timestamp"] = S4U_Simulation::getClock();
       simulation_ends_msg["events"][0]["type"] = "SIMULATION_ENDS";
       simulation_ends_msg["events"][0]["data"] = {};
@@ -2365,7 +2386,7 @@ namespace wrench {
     BatchService::getStartTimeEstimatesFromBatsched(
             std::set<std::tuple<std::string, unsigned int, unsigned int, double>> set_of_jobs) {
       nlohmann::json batch_submission_data;
-      batch_submission_data["now"] = S4U_Simulation::getClock();
+      batch_submission_data["now"] = getClockLessAccurate();
 
 
       // IMPORTANT: THIS IGNORES THE NUMBER OF CORES (THIS IS A LIMITATION OF BATSCHED!)
@@ -2439,7 +2460,7 @@ namespace wrench {
 //      }
 
       nlohmann::json batch_submission_data;
-      batch_submission_data["now"] = S4U_Simulation::getClock();
+      batch_submission_data["now"] = getClockLessAccurate();
       batch_submission_data["events"][0]["timestamp"] = S4U_Simulation::getClock();
       batch_submission_data["events"][0]["type"] = event_type;
       batch_submission_data["events"][0]["data"]["job_id"] = job_id;
@@ -2465,7 +2486,7 @@ namespace wrench {
     void BatchService::startBatschedNetworkListener() {
 
       nlohmann::json compute_resources_map;
-      compute_resources_map["now"] = S4U_Simulation::getClock();
+      compute_resources_map["now"] = getClockLessAccurate();
       compute_resources_map["events"][0]["timestamp"] = S4U_Simulation::getClock();
       compute_resources_map["events"][0]["type"] = "SIMULATION_BEGINS";
       compute_resources_map["events"][0]["data"]["nb_resources"] = this->nodes_to_cores_map.size();
@@ -2509,7 +2530,7 @@ namespace wrench {
       // The WAITING queue is: those jobs that I need to hear from Batsched about
 
       nlohmann::json batch_submission_data;
-      batch_submission_data["now"] = S4U_Simulation::getClock();
+      batch_submission_data["now"] = getClockLessAccurate();
       batch_submission_data["events"] = nlohmann::json::array();
       size_t i;
       std::deque<BatchJob *>::iterator it;
