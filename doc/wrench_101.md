@@ -220,7 +220,7 @@ These messages are thus logging output produced by the WMS in the simple example
 while other messages are disabled as follows: 
 
 ~~~~~~~~~~~~~{.cpp}
-./wrench-simple-example-cloud   platform_files/cloud_hosts.xml workflow_files/genome.dax --log=root.threshold:critical --log=simple_wms.threshold=debug --log=wms.threshold=debug
+./wrench-simple-example-cloud   platform_files/cloud_hosts.xml workflow_files/genome.dax --log=root.threshold:critical --log=simple_wms.threshold:debug --log=wms.threshold:debug
 ~~~~~~~~~~~~~
 
 Use the `--help-logs` option displays information on the way SimGrid logging works. See the 
