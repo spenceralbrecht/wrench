@@ -2202,7 +2202,9 @@ namespace wrench {
      */
     void BatchService::startBatsched() {
 
-      this->batsched_port = 28000 + S4U_Mailbox::generateUniqueSequenceNumber();
+//      this->batsched_port = 28000 + S4U_Mailbox::generateUniqueSequenceNumber();
+      this->batsched_port = 28000 + getpid();
+      std::cerr << "BATSCHED PORT = " << this->batsched_port << "\n";
       this->pid = getpid();
 
 
